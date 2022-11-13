@@ -21,7 +21,8 @@ class FeatureProjection(BaseEstimator, TransformerMixin):
 
     def transform(self, X):
         res = []
-        for i, doc in enumerate(X):
+        for a in X.iterrows():
+            doc = a[1]
             if self.as_dict:
                 row = {field: doc[field] for field in self.fields}
             else:
