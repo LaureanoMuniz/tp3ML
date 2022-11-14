@@ -31,6 +31,31 @@ class FeatureProjection(BaseEstimator, TransformerMixin):
         return res
 
 
+class FeatureProjectionFromJson(BaseEstimator, TransformerMixin):
+    """
+    Recibe una lista de campos a proyectar, y los proyecta como listas o como diccionarios
+    Ver notebook 02
+    """
+
+    def __init__(self, fields, as_dict=False, convert_na=True):
+        self.fields = fields
+        self.as_dict = as_dict
+        self.convert_na = convert_na
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        res = []
+        for i, doc in enumerate(X):
+            if self.as_dict:
+                row = {field: doc[field] for field in self.fields}
+            else:
+                row = [doc[field] for field in self.fields]
+            res.append(row)
+        return res
+
+
 class TargetEncoder(BaseEstimator, TransformerMixin):
     """
     Encodea una categorica como un vector de cuatro dimensiones
@@ -52,15 +77,12 @@ class TargetEncoder(BaseEstimator, TransformerMixin):
         for cat_value, tar_values in values.items():
             if len(tar_values) < self.min_freq: continue
             tar_values = np.asarray(tar_values)
-            self.stats_[cat_value] = [
-                np.mean(tar_values), np.std(tar_values),
-                np.percentile(tar_values, 90), np.percentile(tar_values, 10),
-            ]
+            freq = np.bincount(tar_values)
+            self.stats_[cat_value] = list(np.argsort(freq)[::-1][:2])
 
-        self.default_stats_ = [
-            np.mean(y), np.std(y),
-            np.percentile(y, 90), np.percentile(y, 10)
-        ]
+
+        freq = np.bincount(y)
+        self.default_stats_ = list(np.argsort(freq)[::-1][:2])
         # Siempre hay que devolver self
         return self
 

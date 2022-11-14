@@ -13,16 +13,16 @@ def x_y_split(data: pd.DataFrame):
     return data[cols], data['genre']
 
 def to_json_lines(X: pd.DataFrame, y: pd.Series, filename: str):
-    f_x = open(f"X_{filename}")
-    f_y = open(f"y_{filename}")
-    X.to_json(orient='records', lines=True, file=f_x)
-    y.to_json(orient='records', lines=True, file=f_y)
+    f_x = open(f"X_{filename}.jl", 'w')
+    f_y = open(f"y_{filename}.jl", 'w')
+    X.to_json(f_x, orient='records', lines=True)
+    y.to_json(f_y, orient='records', lines=True)
     f_x.close()
     f_y.close()
 
 
 class Evaluator:
-    def __init__(self, X_train, y_train, X_dev, y_dev, X_test=None, y_test=None, metric):
+    def __init__(self, X_train, y_train, X_dev, y_dev, metric, X_test=None, y_test=None):
         self.X_train = X_train
         self.y_train = y_train
         self.X_dev = X_dev
