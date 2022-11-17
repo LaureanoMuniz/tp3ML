@@ -92,6 +92,57 @@ class TargetEncoder(BaseEstimator, TransformerMixin):
             vector = self.stats_.get(doc[self.categorical_field], self.default_stats_)
             res.append(vector)
         return res
+    
+    
+class TargetEncodeWithNumerical(BaseEstimator, TransformerMixin):
+    """
+    Encodea una categorica como un vector con el promedio de las numericas que les pases
+    [mean(numerica1), mean(numerica2), mean(numerica3), ...]
+    """
+
+    def __init__(self, categorical_field, numerical_fields, min_freq=5):
+        self.min_freq = min_freq
+        self.categorical_field = categorical_field
+        self.numerical_fields = numerical_fields
+        self.stats_ = None
+        self.default_stats = None
+
+    def fit(self, X, y):
+        values = defaultdict(list)
+        self.stats_ = {}
+        num_field_dict = defaultdict(list)
+        for i, x in enumerate(X):
+            values[x[self.categorical_field]].append(x) #Separo las rows por categoria
+        
+        for cat_value, tar_values in values.items():
+            if len(tar_values) < self.min_freq: continue #Si la categoria tiene mas de min_freq rows
+            cat_value_vector = []
+            for num_field in self.numerical_fields: #Hago el promedio por categoria de cada variable numerica
+                num_field_vector = []
+                for tar_value in tar_values:
+                    num_field_vector.append(tar_value[num_field])
+                  
+                num_field_vector = np.asarray(num_field_vector)
+                num_field_dict[num_field].append(np.mean(num_field_vector)) #Guardo el promedio numerico de la categoria
+                cat_value_vector.append(np.mean(num_field_vector))
+                         
+            self.stats_[cat_value] = cat_value_vector
+                
+            
+        
+        self.default_stats_ = [np.mean(np.asarray(num_values)) for num_values in list(num_field_dict.values())]
+        
+   
+        # Siempre hay que devolver self
+        return self
+
+    def transform(self, X):
+        res = []
+        for i, doc in enumerate(X):
+            vector = self.stats_.get(doc[self.categorical_field], self.default_stats_)
+            res.append(vector)
+        return res
+
 
 
 class PretrainedFastTextTransformer(BaseEstimator, TransformerMixin):
