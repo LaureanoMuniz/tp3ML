@@ -175,7 +175,7 @@ class TargetEncodeWithNumericalMaxOutlier(BaseEstimator, TransformerMixin):
                   
                 num_field_vector = np.asarray(num_field_vector)
                 num_field_dict[num_field].append(np.percentile(num_field_vector,90)) #Guardo el promedio numerico de la categoria
-                cat_value_vector.append(np.mean(np.percentile(num_field_vector,90)))
+                cat_value_vector.append((np.percentile(num_field_vector,90)))
                          
             self.stats_[cat_value] = cat_value_vector
                 
@@ -226,7 +226,7 @@ class TargetEncodeWithNumericalMinOutlier(BaseEstimator, TransformerMixin):
                   
                 num_field_vector = np.asarray(num_field_vector)
                 num_field_dict[num_field].append(np.percentile(num_field_vector,10)) #Guardo el promedio numerico de la categoria
-                cat_value_vector.append(np.mean(np.percentile(num_field_vector,10)))
+                cat_value_vector.append((np.percentile(num_field_vector,10)))
                          
             self.stats_[cat_value] = cat_value_vector
                 
